@@ -52,7 +52,7 @@ ruta_tuxtla = [
     [16.7605, -93.1151]
 ]
 
-const map = L.map('map').setView([16.7510073, -93.0998758], 13)
+const map = L.map('map').setView([16.7510073, -93.0998758], 15)
 const route = L.polyline(ruta_tuxtla, {color: "green"}).addTo(map)
 
 const taxiIcon = L.icon({
@@ -66,8 +66,8 @@ const taxiIcon = L.icon({
 })
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    
     maxZoom: 19,
+    minZoom: 13,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
@@ -80,11 +80,70 @@ var circle = L.circle([16.7510073, -93.0998758], {
     radius: 500
 }).addTo(map);
 
-var marker2
-setTimeout(()=>{
-    marker2 = L.marker([16.0, -93.0]).addTo(map);
-    
-console.log('negro')
-},5000)
+function logout () {
+    window.loader.loadLogin()
+}
 
+let hours = 0
+let minutes = 0
+let seconds = 0
+let hundredths = 0
+let control = null
 
+const hoursSpan = document.querySelector("#hours")
+const minutesSpan = document.querySelector("#minutes")
+const secondsSpan = document.querySelector("#seconds")
+const buttonCounter = document.querySelector("#buttonCounter")
+
+function startCounter () {
+    if(!control){
+        control = setInterval(cronometro,10);
+        buttonCounter.classList.remove("start")
+        buttonCounter.classList.add("finish")
+        buttonCounter.innerHTML = "fin"
+    } else {
+        clearInterval(control)
+        buttonCounter.classList.add("start")
+        buttonCounter.classList.remove("finish")
+        buttonCounter.innerHTML = "inicio"
+        control = null
+        secondsSpan.innerHTML = "00"
+        minutesSpan.innerHTML = "00"
+        hoursSpan.innerHTML = "00"
+        hundredths = 0
+        seconds = 0
+        minutes = 0
+        hours = 0
+    }
+
+}
+
+function cronometro () {
+	if (hundredths < 99) {
+		hundredths++;
+	}
+	if (hundredths == 99) {
+		hundredths = -1;
+	}
+	if (hundredths == 0) {
+		seconds ++;
+		if (seconds < 10) { seconds = "0"+seconds }
+		secondsSpan.innerHTML = seconds;
+	}
+	if (seconds == 59) {
+		seconds = -1;
+	}
+	if ( (hundredths == 0)&&(seconds == 0) ) {
+		minutes++;
+		if (minutes < 10) { minutes = "0"+minutes }
+		minutesSpan.innerHTML = minutes;
+	}
+	if (minutes == 59) {
+		minutes = -1;
+	}
+	if ( (hundredths == 0)&&(seconds == 0)&&(minutes == 0) ) {
+		hours ++;
+		if (hours < 10) { hours = "0"+hours }
+		hoursSpan.innerHTML = hours;
+	}
+}

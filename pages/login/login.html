@@ -5,7 +5,7 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
+      content="default-src 'self'; script-src 'self'; connect-src 'self' http://localhost:8080;"
     />
     <meta
       http-equiv="X-Content-Security-Policy"
@@ -19,19 +19,42 @@
     <title>TaxiTracker | PIN</title>
   </head>
   <body>
-    <form action="" class="login-pin">
-        <img src="../../public/Logo.png" alt="">
-        <span>Ingrese su código</span>
-        <div>
-            <input type="number" maxlength="1" id="1">
-            <input type="number" maxlength="1" id="2">
-            <input type="number" maxlength="1" id="3">
-            <input type="number" maxlength="1" id="4">
-        </div>
-        <button id="login-button">
-            Entrar
-        </button>
-    </form>
+    <section class="section-login">
+          <figure class="container-modal hidden" id="modal">
+            <span>pin incorrecto</span>
+            <button id="acceptButton">
+              aceptar
+            </button>
+          </figure>
+          <img src="../../public/Logo.png" alt="">
+          <form class="login-pin" onsubmit="login">
+            <span>Ingrese su código</span>
+            <div>
+                <input type="number" maxlength="1" minlength="1" id="1" required>
+                <input type="number" maxlength="1" minlength="1" id="2" required>
+                <input type="number" maxlength="1" minlength="1" id="3" required>
+                <input type="number" maxlength="1" minlength="1" id="4" required>
+            </div>
+          </form>
+          <figure class="container-numbers-keyboard">
+            <button  name="digit" value="1">1</button>
+            <button  name="digit" value="2">2</button>
+            <button  name="digit" value="3">3</button>
+            <button  name="digit" value="4">4</button>
+            <button  name="digit" value="5">5</button>
+            <button  name="digit" value="6">6</button>
+            <button  name="digit" value="7">7</button>
+            <button  name="digit" value="8">8</button>
+            <button  name="digit" value="9">9</button>
+            <button onclick="erasePin" id="deleteButton">
+              <img src="../../public/delete-left-solid.svg" alt="borrar">
+            </button>
+            <button name="digit" value="0">0</button>
+            <button id="confirmButton">
+              <img src="../../public/check-solid.svg" alt="">
+            </button>
+          </figure>
+        </section>
 </body>
 <script src="renderer.js"></script>
 </html>

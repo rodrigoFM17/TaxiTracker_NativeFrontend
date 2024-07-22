@@ -16,9 +16,12 @@ const createWindow = (page) => {
 }
 
 ipcMain.handle('loadMain', () => {
-  
   createWindow('main')
   console.log('se pudo')
+})
+
+ipcMain.handle("loadLogin", () => {
+  createWindow("login")
 })
 
 

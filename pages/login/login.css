@@ -1,21 +1,38 @@
+.section-login {
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+    "logo logo"
+    "pin keyboard";
+    padding: 10%;
+    gap: 2em;
+    justify-content: center;
+}
+
+.section-login > img {
+    width: 20vw;
+    margin: 0 auto -100px auto;
+    grid-area: logo;
+}
+
 .login-pin{
-    margin: 0 auto;
-    padding: 20vh 0;
-    width: 60%;
+    width: 100%;
+    grid-area: pin;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    height: 100vh;
 }
 
-.login-pin div{
+.login-pin > div{
     display: flex;
     gap: 20px;
     justify-content: center;
 }
 
-.login-pin div input {
+.login-pin > div input {
     background: none;
     border: none;
     outline: none;
@@ -26,19 +43,61 @@
     color: var(--yw-500);
 }
 
-.login-pin span {
+.login-pin > span {
     font-size: 5vh;
 }
 
-.login-pin button{
-    padding: 1vw 5vw;
-    font-size: 5vh;
-    background-color: var(--yw-500);
-    color: var(--gray-600);
+.container-numbers-keyboard{
+    grid-area: keyboard;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
+}
+
+.container-numbers-keyboard img {
+    width: 30%;
+    max-width: 100px;
+}
+
+.container-numbers-keyboard button {
+    border-radius: 5px;
+    background-color: var(--gray-700);
+    color: var(--yw-500);
+    box-shadow: none;
     border: none;
-    border-radius: 1vw;
+    font-size: 1em;
 }
 
-.login-pin img {
-    width: 20vw;
+.container-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 5;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.container-modal span {
+    font-size: 2em;
+}
+
+.container-modal button {
+    font-size: 2em;
+    padding: .5em 2em;
+    border-radius: 5px;
+    background-color: var(--yw-500);
+    color: white;
+}
+
+.hidden {
+    display: none
 }

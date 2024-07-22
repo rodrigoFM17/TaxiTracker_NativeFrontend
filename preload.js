@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld(
 'loader', {
   loadMain: () => ipcRenderer.invoke('loadMain'),
+  loadLogin: () => ipcRenderer.invoke('loadLogin')
 })
 
 contextBridge.exposeInMainWorld('versions', {
