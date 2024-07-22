@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain, nativeTheme } = require('electron')
 const path = require('node:path')
 
+let driverId = null
+
 const createWindow = (page) => {
   const wins = BrowserWindow.getAllWindows()
   wins.forEach(win => win.close())
@@ -24,6 +26,13 @@ ipcMain.handle("loadLogin", () => {
   createWindow("login")
 })
 
+ipcMain.handle("getDriverId", () => {
+  return driverId
+})
+
+ipcMain.on("setDriverId", (event, newDriverid) => {
+  driverId = newDriverid
+})
 
 app.whenReady().then(() => {
   createWindow('login')

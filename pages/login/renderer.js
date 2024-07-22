@@ -1,4 +1,5 @@
-const API_USERS = "http://localhost:8080"
+
+const API_USERS_URL = "http://44.213.140.135"
 
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = document.querySelectorAll('input[type="number"]');
@@ -36,18 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault()
       console.log(pin)
 
-      await fetch(`${API_USERS}/auth/drivers/${pin}`)
+      await fetch(`${API_USERS_URL}/auth/drivers/${pin}`)
       .then(res => res.json())
       .then(data => {
-        if(data.status == "success")
+        if(data.status == "success"){
+          console.log(data)
+          window.loader.setDriverId(data.data.id)
           window.loader.loadMain()
-        else{
+        } else{
           modal.classList.toggle("hidden")
           inputs.forEach(input => input.value = "")
           pin = ""
         }
 
-        console.log(data)
       })
     })
 
