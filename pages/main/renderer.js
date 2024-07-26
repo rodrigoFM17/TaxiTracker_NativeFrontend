@@ -37,7 +37,7 @@ async function getCurrentLocation() {
                 notification.classList.add("hidden");
             }
 
-            const { lat, long } = data.data.location;
+            const { lat, long } = data.data;
             console.log(lat, long);
 
             if(lat === 0 && long === 0) {
