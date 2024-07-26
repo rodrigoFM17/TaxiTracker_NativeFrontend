@@ -1,5 +1,6 @@
 
-const API_USERS_URL = "http://44.213.140.135"
+const API_USERS_URL = "https://taxitracker-api-users.freemyip.com"
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = document.querySelectorAll('input[type="number"]');
@@ -8,7 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const eraseButton = document.querySelector("#deleteButton")
     const modal = document.querySelector("#modal")
     const accpetButton = document.querySelector("#acceptButton")
+    
     let pin = ""
+
+    const useModal = (msg) => {
+      modal.classList.toggle("hidden")
+      message.innerHTML = msg
+      inputs.forEach(input => input.value = "")
+      pin = ""
+    }
     
     inputs.forEach((input, index) => {
       input.addEventListener('input', () => {
@@ -37,20 +46,25 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault()
       console.log(pin)
 
-      await fetch(`${API_USERS_URL}/auth/drivers/${pin}`)
-      .then(res => res.json())
-      .then(data => {
-        if(data.status == "success"){
-          console.log(data)
-          window.loader.setDriverId(data.data.id)
-          window.loader.loadMain()
-        } else{
-          modal.classList.toggle("hidden")
-          inputs.forEach(input => input.value = "")
-          pin = ""
+      if(pin.length == 4) {
+        try {
+          await fetch(`${API_USERS_URL}/auth/drivers/${pin}`)
+          .then(res => res.json())
+          .then(data => {
+            if(data.status == "success"){
+              console.log(data)
+              window.loader.setDriverId(data.data.id)
+              window.loader.loadMain()
+            } else{
+              useModal("pin incorrecto")
+            }
+    
+          })
+        } catch {
+          useModal("no es posible conectarse a los servidores de TaxiTracker")
         }
-
-      })
+      } else 
+        useModal("el pin es de 4 digitos")
     })
 
     eraseButton.addEventListener("click", () => {

@@ -1,7 +1,6 @@
 const API_DATA_URL = "http://localhost:8000"
 
 const map = L.map('map').setView([16.7510073, -93.0998758], 15)
-const route = L.polyline(ruta_tuxtla, {color: "green"}).addTo(map)
 
 const taxiIcon = L.icon({
     iconUrl: '../../public/taxi.png',
@@ -19,14 +18,8 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-var marker = L.marker([16.7510073, -93.0998758], {icon: taxiIcon}).addTo(map);
-
-var circle = L.circle([16.7510073, -93.0998758], {
-    color: 'red',
-    fillColor: '#f03',
-    fillOpacity: 0.5,
-    radius: 500
-}).addTo(map);
+// let marker = L.marker([16.7510073, -93.0998758], {icon: taxiIcon}).addTo(map);
+let marker = null
 
 function logout () {
     window.loader.loadLogin()
@@ -43,39 +36,75 @@ const minutesSpan = document.querySelector("#minutes")
 const secondsSpan = document.querySelector("#seconds")
 const buttonCounter = document.querySelector("#buttonCounter")
 
+async function getCurrentLocation() {
+    const notification = document.querySelector("#notification")
+
+    try{
+        await fetch("http://localhost:8000/geolocation")
+        .then(res => res.json())
+        .then(data => {
+            if(!notification.classList.contains("hidden"))
+                notification.classList.add("hidden")
+            const {lat, long} = data.data.location
+            console.log(lat, long)
+            if(marker)
+                marker.setLatLng([lat, long])
+            else 
+                marker = L.marker([lat, long], {icon: taxiIcon}).addTo(map);
+            map.setView([lat, long])
+        })
+        
+    } catch {
+        if(notification.classList.contains("hidden"))
+            notification.classList.remove("hidden")
+    } finally {
+        await getCurrentLocation()
+    }
+}
+
+getCurrentLocation()
+
 async function startCounter () {
     const driverId = await window.loader.getDriverId()
     console.log(driverId)
     if(!control){
-        await fetch(`${API_DATA_URL}/travels/init`, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({driver_id: driverId})
-        })
-        .then(res => res.json())
-        .then(data => {console.log(data)})
-        control = setInterval(cronometro,10);
-        buttonCounter.classList.remove("start")
-        buttonCounter.classList.add("finish")
-        buttonCounter.innerHTML = "fin"
+        try {
+            // await fetch(`${API_DATA_URL}/travels/init`, {
+            //     method: "POST",
+            //     headers: {"Content-Type": "application/json"},
+            //     body: JSON.stringify({driver_id: driverId})
+            // })
+            // .then(res => res.json())
+            // .then(data => {console.log(data)})
+            control = setInterval(cronometro,10);
+            buttonCounter.classList.remove("start")
+            buttonCounter.classList.add("finish")
+            buttonCounter.innerHTML = "fin"
+        } catch {
+            alert("no hay conexion con los sensores")
+        }
     } else {
-        await fetch(`${API_DATA_URL}/travels/finish`, {
-            method: "POST",
-        })
-        .then(res => res.json())
-        .then(data => {console.log(data)})
-        clearInterval(control)
-        buttonCounter.classList.add("start")
-        buttonCounter.classList.remove("finish")
-        buttonCounter.innerHTML = "inicio"
-        control = null
-        secondsSpan.innerHTML = "00"
-        minutesSpan.innerHTML = "00"
-        hoursSpan.innerHTML = "00"
-        hundredths = 0
-        seconds = 0
-        minutes = 0
-        hours = 0
+        try {
+            // await fetch(`${API_DATA_URL}/travels/finish`, {
+            //     method: "POST",
+            // })
+            // .then(res => res.json())
+            // .then(data => {console.log(data)})
+            clearInterval(control)
+            buttonCounter.classList.add("start")
+            buttonCounter.classList.remove("finish")
+            buttonCounter.innerHTML = "inicio"
+            control = null
+            secondsSpan.innerHTML = "00"
+            minutesSpan.innerHTML = "00"
+            hoursSpan.innerHTML = "00"
+            hundredths = 0
+            seconds = 0
+            minutes = 0
+            hours = 0
+        } catch {
+            alert("no hay conexion con los sensores")
+        }
     }
 
 }

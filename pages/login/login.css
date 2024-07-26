@@ -88,6 +88,8 @@
 
 .container-modal span {
     font-size: 2em;
+    width: 50%;
+    text-align: center;
 }
 
 .container-modal button {
