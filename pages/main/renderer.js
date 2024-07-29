@@ -1,10 +1,11 @@
 const API_DATA_URL = "https://taxitracker-machinelearning.freemyip.com";
+const API_SENSORS_URL = "http://localhost:8000";
 
 const map = L.map('map').setView([16.7510073, -93.0998758], 14);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    minZoom: 13,
+    // maxZoom: 19,
+    // minZoom: 13,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
@@ -30,14 +31,15 @@ async function getCurrentLocation() {
 
     while (true) {
         try {
-            const response = await fetch("http://localhost:8000/geolocation");
+            const response = await fetch(`${API_SENSORS_URL}/geolocation`);
             const data = await response.json();
+            console.log("Geolocation Data:", data);
 
             if (!notification.classList.contains("hidden")) {
                 notification.classList.add("hidden");
             }
 
-            const { lat, long } = data.data;
+            const { lat, long } = data;
             console.log(lat, long);
 
             if(lat === 0 && long === 0) {
@@ -102,41 +104,54 @@ async function updateHeatmap(hour) {
     });
 
     for (const quadrant in heatmapData) {
-        const { x, y, z } = heatmapData[quadrant];
-        console.log(`Quadrant ${quadrant}:`, { x, y, z });
+        const { coordinates, predictions } = heatmapData[quadrant];
 
         // Crear un array de puntos para el heatmap
-        const heatmapPoints = x.map((lat, i) => {
-            return [lat, y[i], z[i]];
+        const heatmapPoints = coordinates.map((coord, i) => {
+            return [coord[0], coord[1], predictions[i]];
         });
 
-        // Asegúrate de que los valores de z están normalizados correctamente
-        const maxIntensity = Math.max(...z);
+        // Asegúrate de que los valores de predictions están normalizados correctamente
+        const maxIntensity = Math.max(...predictions);
         const normalizedPoints = heatmapPoints.map(point => [point[0], point[1], point[2] / maxIntensity]);
 
         const heatmapLayer = L.heatLayer(normalizedPoints, {
-            radius: 22,
-            blur: 15,
-            maxZoom: 17,
+            // radius: 20,
+            radius: 120,
+            blur: 20,
+            maxZoom: 19,
             max: 1.0,  // Asegúrate de que esto coincida con tu normalización
             gradient: {0.4: 'blue', 0.6: 'lime', 0.7: 'yellow', 0.8: 'orange', 1.0: 'red'}
         }).addTo(map);
 
-        console.log("Heatmap layer added to map");
+        console.log(`Heatmap layer added to map for quadrant ${quadrant}`);
     }
 }
 
 function getCurrentHour() {
     const now = new Date();
+    console.log('Current hour:', now.getHours());
     return now.getHours();
 }
 
 function startHeatmapUpdates() {
-    updateHeatmap(getCurrentHour());
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const milliseconds = now.getMilliseconds();
 
-    setInterval(() => {
+    // Calcula el tiempo restante hasta la próxima hora en punto
+    const timeUntilNextHour = ((60 - minutes - 1) * 60 * 1000) + ((60 - seconds) * 1000) + (1000 - milliseconds);
+
+    setTimeout(() => {
         updateHeatmap(getCurrentHour());
-    }, 3600000);
+        setInterval(() => {
+            updateHeatmap(getCurrentHour());
+        }, 3600000); // Actualiza cada hora
+    }, timeUntilNextHour);
+
+    // Actualiza el mapa de calor inmediatamente
+    updateHeatmap(getCurrentHour());
 }
 
 // Start heatmap updates
@@ -153,35 +168,66 @@ const minutesSpan = document.querySelector("#minutes");
 const secondsSpan = document.querySelector("#seconds");
 const buttonCounter = document.querySelector("#buttonCounter");
 
-async function startCounter() {
+async function startTravel() {
     const driverId = await window.loader.getDriverId();
     console.log(driverId);
     if (!control) {
         try {
+            const response = await fetch(`${API_SENSORS_URL}/travels/init`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ driver_id: driverId })
+            });
+
+            console.log("Response:", response);
+
+            if (!response.ok) {
+                throw new Error('Sensors response was not ok');
+            }
+
             control = setInterval(cronometro, 10);
             buttonCounter.classList.remove("start");
             buttonCounter.classList.add("finish");
             buttonCounter.innerHTML = "fin";
         } catch {
-            alert("no hay conexion con los sensores");
+            alert("No hay conexión con los sensores");
         }
     } else {
-        try {
-            clearInterval(control);
-            buttonCounter.classList.add("start");
-            buttonCounter.classList.remove("finish");
-            buttonCounter.innerHTML = "inicio";
-            control = null;
-            secondsSpan.innerHTML = "00";
-            minutesSpan.innerHTML = "00";
-            hoursSpan.innerHTML = "00";
-            hundredths = 0;
-            seconds = 0;
-            minutes = 0;
-            hours = 0;
-        } catch {
-            alert("no hay conexion con los sensores");
+        endTravel();
+    }
+}
+
+async function endTravel() {
+    try {
+        const response = await fetch(`${API_SENSORS_URL}/travels/finish`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log("Response:", response);
+
+        if (!response.ok) {
+            throw new Error('Sensors response was not ok');
         }
+
+        clearInterval(control);
+        buttonCounter.classList.add("start");
+        buttonCounter.classList.remove("finish");
+        buttonCounter.innerHTML = "inicio";
+        control = null;
+        secondsSpan.innerHTML = "00";
+        minutesSpan.innerHTML = "00";
+        hoursSpan.innerHTML = "00";
+        hundredths = 0;
+        seconds = 0;
+        minutes = 0;
+        hours = 0;
+    } catch {
+        alert("no hay conexion con los sensores");
     }
 }
 
